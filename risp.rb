@@ -21,8 +21,14 @@ def read(tokens)
   end
 end
 
+module Kernel
+  def symbol(obj)
+    obj.intern
+  end
+end
+
 def atom(token)
-  #something
+
 end
 
 puts token(ARGV[0])
