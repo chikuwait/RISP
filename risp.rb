@@ -38,6 +38,33 @@ def reader_interface(s)
 end
 
 def evaluate(x, env = $global_env)
-
+    case x
+    when Symbol
+        env.find(x)[x]
+    when Array
+        case x.first
+        when :quote
+            _, exp = x
+            exp
+        when :if
+            _, test, conseq, alt = x
+            evaluate((evaluate(test,env) ? conseq : alt),env)
+        when :set!
+            _, var, exp = x
+            env.find(var)[var] = evaluate(exp,env)
+        when :define
+            _, var, exp = x
+            env[var] = evaluate(exp,env)
+        when :lambda
+            _, vars, exp = x
+            lambda{|*args| evaluate(exp,Env.new(vars,args,env))}
+        else
+            proc, *exps = x.inject([]) { |mem, exp| mem << evaluate(exp,env)}
+            proc[*exps]
+        end
+    else
+      x
+    end
 end
+
 reader_interface(ARGV[0])
