@@ -32,7 +32,8 @@ def atom(token,type=[:Integer, :Float, :Symbol])
 rescue ArgumentError
   retry
 end
-def read(s)
+def reader_interface(s)
   read(token(s))
 end
-token(ARGV[0])
+
+reader_interface(ARGV[0])
