@@ -22,7 +22,7 @@ def read(tokens)
 end
 
 module Kernel
-  def symbol(obj)
+  def Symbol(obj)
     obj.intern
   end
 end
