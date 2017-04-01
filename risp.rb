@@ -27,8 +27,12 @@ module Kernel
   end
 end
 
-def atom(token)
-
+def atom(token,type=[:Integer, :Float, :Symbol])
+  send(type.shift, token)
+rescue ArgumentError
+  retry
 end
+
+
 
 puts token(ARGV[0])
