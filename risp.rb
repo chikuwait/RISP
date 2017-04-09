@@ -67,4 +67,16 @@ def evaluate(x, env = $global_env)
     end
 end
 
+class Env < Hash
+  def initialize(parms = [], args = [], outer = nil)
+    h = hash[parms.zip(args)]
+    self.merge!(h)
+    @outer = outer
+  end
+
+  def find(key)
+    self.has_key?(key) ? self : @outer.find(key)
+  end
+end
+
 reader_interface(ARGV[0])
