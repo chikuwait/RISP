@@ -79,4 +79,22 @@ class Env < Hash
   end
 end
 
+def add_globals(env)
+    env.merge!({
+         :+     => ->x,y{x+y},      :-      => ->x,y{x-y},
+         :*    => ->x,y{x*y},       :/     => ->x,y{x/y},
+         :not    => ->x{!x},        :>    => ->x,y{x>y},
+         :<     => ->x,y{x<y},      :>=     => ->x,y{x>=y},
+         :<=   => ->x,y{x<=y},      :'='   => ->x,y{x==y},
+         :equal? => ->x,y{x.equal?(y)}, :eq?   => ->x,y{x.eql? y},
+         :length => ->x{x.length},  :cons => ->x,y{[x,y]},
+         :car   => ->x{x[0]},       :cdr    => ->x{x[1..-1]},
+         :append => ->x,y{x+y},     :list  => ->*x{[*x]},
+         :list?  => ->x{x.instance_of?(Array)},
+         :null? => ->x{x.empty?},   :symbol? => ->x{x.instance_of?(Symbol)}
+        })
+      env
+end
+
+$global_env = add_globals(Env.new)
 reader_interface(ARGV[0])
