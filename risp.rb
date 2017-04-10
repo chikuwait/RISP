@@ -1,3 +1,40 @@
+require "readline"
+
+class Env < Hash
+  def initialize(parms = [], args = [], outer = nil)
+    h = hash[parms.zip(args)]
+    self.merge!(h)
+    self.merge!(yeild) if block_given?
+    @outer = outer
+  end
+
+  def find(key)
+    self.has_key?(key) ? self : @outer.find(key)
+  end
+end
+
+$global_env = Env.new do
+    {
+         :+     => ->x,y{x+y},      :-      => ->x,y{x-y},
+         :*    => ->x,y{x*y},       :/     => ->x,y{x/y},
+         :not    => ->x{!x},        :>    => ->x,y{x>y},
+         :<     => ->x,y{x<y},      :>=     => ->x,y{x>=y},
+         :<=   => ->x,y{x<=y},      :'='   => ->x,y{x==y},
+         :equal? => ->x,y{x.equal?(y)}, :eq?   => ->x,y{x.eql? y},
+         :length => ->x{x.length},  :cons => ->x,y{[x,y]},
+         :car   => ->x{x[0]},       :cdr    => ->x{x[1..-1]},
+         :append => ->x,y{x+y},     :list  => ->*x{[*x]},
+         :list?  => ->x{x.instance_of?(Array)},
+         :null? => ->x{x.empty?},   :symbol? => ->x{x.instance_of?(Symbol)}
+    }
+end
+
+module Kernel
+  def Symbol(obj)
+    obj.intern
+  end
+end
+
 def token(str)
   raise ArgumentError,'There is no argument' if str == nil
   str.gsub(/[()]/, ' \0 ').split
@@ -18,12 +55,6 @@ def read(tokens)
     raise SyntaxError, 'unexpected )'
   else
     atom(token)
-  end
-end
-
-module Kernel
-  def Symbol(obj)
-    obj.intern
   end
 end
 
@@ -67,37 +98,8 @@ def evaluate(x, env = $global_env)
     end
 end
 
-class Env < Hash
-  def initialize(parms = [], args = [], outer = nil)
-    h = hash[parms.zip(args)]
-    self.merge!(h)
-    self.merge!(yeild) if block_given?
-    @outer = outer
-  end
-
-  def find(key)
-    self.has_key?(key) ? self : @outer.find(key)
-  end
-end
-
-$global_env = Env.new do
-    {
-         :+     => ->x,y{x+y},      :-      => ->x,y{x-y},
-         :*    => ->x,y{x*y},       :/     => ->x,y{x/y},
-         :not    => ->x{!x},        :>    => ->x,y{x>y},
-         :<     => ->x,y{x<y},      :>=     => ->x,y{x>=y},
-         :<=   => ->x,y{x<=y},      :'='   => ->x,y{x==y},
-         :equal? => ->x,y{x.equal?(y)}, :eq?   => ->x,y{x.eql? y},
-         :length => ->x{x.length},  :cons => ->x,y{[x,y]},
-         :car   => ->x{x[0]},       :cdr    => ->x{x[1..-1]},
-         :append => ->x,y{x+y},     :list  => ->*x{[*x]},
-         :list?  => ->x{x.instance_of?(Array)},
-         :null? => ->x{x.empty?},   :symbol? => ->x{x.instance_of?(Symbol)}
-    }
-end
-
 def to_string(exp)
   puts (exp.instance_of?(Array)) ? '('+ exp.map(&:to_s).join(" ") + ')' : "#{exp}"
 end
-require "readline"
+
 reader_interface(ARGV[0])
