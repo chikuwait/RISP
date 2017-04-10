@@ -96,4 +96,8 @@ $global_env = Env.new do
     }
 end
 
+def to_string(exp)
+  puts (exp.instance_of?(Array)) ? '('+ exp.map(&:to_s).join(" ") + ')' : "#{exp}"
+end
+require "readline"
 reader_interface(ARGV[0])
