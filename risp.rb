@@ -71,6 +71,7 @@ class Env < Hash
   def initialize(parms = [], args = [], outer = nil)
     h = hash[parms.zip(args)]
     self.merge!(h)
+    self.merge!(yeild) if block_given?
     @outer = outer
   end
 
@@ -79,8 +80,8 @@ class Env < Hash
   end
 end
 
-def add_globals(env)
-    env.merge!({
+$global_env = Env.new do
+    {
          :+     => ->x,y{x+y},      :-      => ->x,y{x-y},
          :*    => ->x,y{x*y},       :/     => ->x,y{x/y},
          :not    => ->x{!x},        :>    => ->x,y{x>y},
@@ -92,9 +93,7 @@ def add_globals(env)
          :append => ->x,y{x+y},     :list  => ->*x{[*x]},
          :list?  => ->x{x.instance_of?(Array)},
          :null? => ->x{x.empty?},   :symbol? => ->x{x.instance_of?(Symbol)}
-        })
-      env
+    }
 end
 
-$global_env = add_globals(Env.new)
 reader_interface(ARGV[0])
